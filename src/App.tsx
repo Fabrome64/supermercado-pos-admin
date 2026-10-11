@@ -15,8 +15,8 @@ import {
   INITIAL_PRODUCTS, INITIAL_PROVEEDORES 
 } from './services/mockData';
 import { 
-  ShoppingCart, Package, Users, LayoutDashboard, Store, Download, Smartphone, 
-  CreditCard, Percent, Wallet, Truck 
+  ShoppingCart, Package, Users, LayoutDashboard, Download, Smartphone, 
+  CreditCard, Percent, Wallet, Truck, MapPin, MessageCircle 
 } from 'lucide-react';
 
 const queryClient = new QueryClient();
@@ -39,18 +39,40 @@ export function App() {
       <div className="min-h-screen bg-[#E6E6FA] text-slate-900 flex flex-col font-sans select-none">
         {/* Navigation Top Header - Dark Blue Theme (#0B192C) */}
         <header className="bg-[#0B192C] text-white border-b border-slate-800 px-6 py-3 flex items-center justify-between shadow-xl z-10 flex-wrap gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-950">
-              <Store className="w-6 h-6 text-white" />
-            </div>
+          <div className="flex items-center gap-3.5">
+            <img 
+              src="/logo.jpg" 
+              alt="Lo de SU - Kiosco Almacén" 
+              className="w-13 h-13 rounded-full object-cover border-2 border-pink-500 shadow-lg shadow-pink-500/25 shrink-0 bg-slate-950" 
+            />
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="font-extrabold text-white text-base leading-tight">SUPERMERCADO POS</h1>
-                <span className="bg-blue-950 text-blue-300 border border-blue-700 text-[10px] px-2.5 py-0.5 rounded-full font-mono font-bold">
-                  WEB PWA
+                <h1 className="font-black text-white text-lg tracking-tight leading-none">
+                  Lo de SU
+                </h1>
+                <span className="bg-pink-950/80 text-pink-300 border border-pink-600/70 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                  Kiosco • Almacén
+                </span>
+                <span className="bg-blue-950 text-blue-300 border border-blue-700 text-[10px] px-2 py-0.5 rounded-full font-mono font-bold">
+                  PWA
                 </span>
               </div>
-              <p className="text-xs text-blue-200 font-mono">Panel de Control & Administración</p>
+              <div className="flex flex-wrap items-center gap-x-3.5 gap-y-1 text-xs text-slate-300 mt-1">
+                <span className="flex items-center gap-1 text-slate-300">
+                  <MapPin className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+                  Nicolás Mascardi 743 Grand Bourg - Buenos Aires
+                </span>
+                <a 
+                  href="https://wa.me/5491125819825" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="flex items-center gap-1 font-bold text-emerald-400 hover:text-emerald-300 bg-emerald-950/60 border border-emerald-600/60 px-2 py-0.5 rounded-md transition-colors"
+                  title="Abrir WhatsApp"
+                >
+                  <MessageCircle className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                  +54 9 11 2581-9825
+                </a>
+              </div>
             </div>
           </div>
 
