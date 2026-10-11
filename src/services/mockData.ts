@@ -1,4 +1,4 @@
-import type { Producto, Cliente, Gasto, FormaPagoItem, ImpuestoItem, GastoItem } from '../types/pos';
+import type { Producto, Cliente, Gasto, FormaPagoItem, ImpuestoItem, GastoItem, Proveedor } from '../types/pos';
 
 export const INITIAL_FORMAS_PAGO: FormaPagoItem[] = [
   { id: 'fp-1', nombre: 'Efectivo en Caja', recargo_descuento_pct: 0, estado: 'activo' },
@@ -160,5 +160,48 @@ export const INITIAL_GASTOS: Gasto[] = [
     monto: 12500.00,
     descripcion: 'Bobinas de papel térmico para tickets 80mm',
     creado_en: '2026-10-05',
+  },
+];
+
+export const INITIAL_PROVEEDORES: Proveedor[] = [
+  {
+    id: 'prov-1',
+    nombre_empresa: 'Distribuidora Mayorista San Cayetano S.R.L.',
+    direccion: 'Av. Juan B. Justo 4520, CABA',
+    whatsapp: '1145678901',
+    cuit: '30.709845.8',
+    arba: 'Inscripto - Agente Percepción (1.5%)',
+    observaciones: 'Reparto días martes y jueves. Pago a 15 días o contado 5% descuento. Pedido mínimo $120.000.',
+    estado: 'activo',
+  },
+  {
+    id: 'prov-2',
+    nombre_empresa: 'Lácteos y Derivados del Sur S.A.',
+    direccion: 'Ruta 205 Km 64, Cañuelas, Bs. As.',
+    whatsapp: '1133221100',
+    cuit: '30.654321.2',
+    arba: 'Régimen General ARBA N° 902-334455-1',
+    observaciones: 'Camión refrigerado lunes y viernes 07:00 hs. Controlar vencimientos al descargar.',
+    estado: 'activo',
+  },
+  {
+    id: 'prov-3',
+    nombre_empresa: 'Bebidas & Gaseosas Quilmes Distribución',
+    direccion: 'Av. Hipólito Yrigoyen 8900, Lomas de Zamora',
+    whatsapp: '1166778899',
+    cuit: '33.501234.9',
+    arba: 'Inscripto ARBA - Exento percepciones',
+    observaciones: 'Preventista pasa los miércoles. Envases retornables ordenados en cajones de 12 u.',
+    estado: 'activo',
+  },
+  {
+    id: 'prov-4',
+    nombre_empresa: 'Panificadora & Harinas del Plata',
+    direccion: 'Calle 14 N° 780, Berazategui, Bs. As.',
+    whatsapp: '1122446688',
+    cuit: '27.245678.4',
+    arba: 'Régimen Simplificado ARBA',
+    observaciones: 'Entrega diaria de pan fresco a primera hora (06:30 hs).',
+    estado: 'activo',
   },
 ];

@@ -1,19 +1,21 @@
 import React, { useState } from 'react';
-import type { GastoItem, FormaPagoItem } from '../../types/pos';
-import { Wallet, Plus, Edit3, Trash2, X } from 'lucide-react';
+import type { GastoItem, FormaPagoItem, Proveedor } from '../../types/pos';
+import { Wallet, Plus, Edit3, Trash2, X, Truck } from 'lucide-react';
 
 interface GastosScreenProps {
   gastos: GastoItem[];
   setGastos: React.Dispatch<React.SetStateAction<GastoItem[]>>;
   formasPago: FormaPagoItem[];
+  proveedores?: Proveedor[];
 }
 
-export const GastosScreen: React.FC<GastosScreenProps> = ({ gastos, setGastos, formasPago }) => {
+export const GastosScreen: React.FC<GastosScreenProps> = ({ gastos, setGastos, formasPago, proveedores = [] }) => {
   const [showModal, setShowModal] = useState(false);
   const [editingItem, setEditingItem] = useState<GastoItem | null>(null);
 
   // Formas de pago activas para el desplegable
   const activeFormasPago = formasPago.filter((fp) => fp.estado === 'activo');
+  const activeProveedores = proveedores.filter((p) => p.estado === 'activo');
 
   const [formData, setFormData] = useState({
     concepto: '',
@@ -22,6 +24,7 @@ export const GastosScreen: React.FC<GastosScreenProps> = ({ gastos, setGastos, f
     fecha: new Date().toISOString().split('T')[0],
     forma_pago_nombre: activeFormasPago[0]?.nombre || 'Efectivo en Caja',
     comprobante: '',
+    proveedor_nombre: '',
   });
 
   const categories = ['Servicios', 'Insumos', 'Logística', 'Mantenimiento', 'Sueldos', 'Alquiler', 'Varios'];
@@ -35,6 +38,7 @@ export const GastosScreen: React.FC<GastosScreenProps> = ({ gastos, setGastos, f
       fecha: new Date().toISOString().split('T')[0],
       forma_pago_nombre: activeFormasPago[0]?.nombre || 'Efectivo en Caja',
       comprobante: '',
+      proveedor_nombre: '',
     });
     setShowModal(true);
   };
@@ -48,6 +52,7 @@ export const GastosScreen: React.FC<GastosScreenProps> = ({ gastos, setGastos, f
       fecha: item.fecha,
       forma_pago_nombre: item.forma_pago_nombre,
       comprobante: item.comprobante || '',
+      proveedor_nombre: item.proveedor_nombre || '',
     });
     setShowModal(true);
   };
@@ -70,7 +75,12 @@ export const GastosScreen: React.FC<GastosScreenProps> = ({ gastos, setGastos, f
       setGastos((prev) =>
         prev.map((item) =>
           item.id === editingItem.id
-            ? { ...item, ...formData, monto: numMonto }
+            ? {
+                ...item,
+                ...formData,
+                monto: numMonto,
+                proveedor_nombre: formData.proveedor_nombre || undefined,
+              }
             : item
         )
       );
@@ -84,6 +94,7 @@ export const GastosScreen: React.FC<GastosScreenProps> = ({ gastos, setGastos, f
         fecha: formData.fecha,
         forma_pago_nombre: formData.forma_pago_nombre,
         comprobante: formData.comprobante.trim() || undefined,
+        proveedor_nombre: formData.proveedor_nombre || undefined,
       };
       setGastos((prev) => [newItem, ...prev]);
     }
@@ -129,6 +140,7 @@ export const GastosScreen: React.FC<GastosScreenProps> = ({ gastos, setGastos, f
               <tr>
                 <th className="p-4">Fecha</th>
                 <th className="p-4">Concepto / Descripción</th>
+                <th className="p-4">Proveedor</th>
                 <th className="p-4">Categoría</th>
                 <th className="p-4">Medio de Pago</th>
                 <th className="p-4">Comprobante</th>
@@ -139,7 +151,7 @@ export const GastosScreen: React.FC<GastosScreenProps> = ({ gastos, setGastos, f
             <tbody className="divide-y divide-slate-200">
               {gastos.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-slate-400 font-medium">
+                  <td colSpan={8} className="p-8 text-center text-slate-400 font-medium">
                     No hay gastos operativos registrados en este período.
                   </td>
                 </tr>
@@ -148,6 +160,16 @@ export const GastosScreen: React.FC<GastosScreenProps> = ({ gastos, setGastos, f
                   <tr key={item.id} className="hover:bg-slate-50 transition-colors">
                     <td className="p-4 font-mono font-semibold text-slate-900">{item.fecha}</td>
                     <td className="p-4 font-bold text-slate-900">{item.concepto}</td>
+                    <td className="p-4">
+                      {item.proveedor_nombre ? (
+                        <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-900 border border-amber-200 text-xs px-2 py-0.5 rounded-md font-semibold">
+                          <Truck className="w-3 h-3 text-amber-700" />
+                          {item.proveedor_nombre}
+                        </span>
+                      ) : (
+                        <span className="text-slate-400 text-xs">-</span>
+                      )}
+                    </td>
                     <td className="p-4">
                       <span className="bg-slate-100 text-slate-700 text-xs px-2.5 py-1 rounded-md border border-slate-300 font-semibold">
                         {item.categoria}
@@ -268,6 +290,24 @@ export const GastosScreen: React.FC<GastosScreenProps> = ({ gastos, setGastos, f
                     ))}
                   </select>
                 </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-slate-700 block mb-1">
+                  Proveedor / Empresa Asociada (Desplegable Opcional)
+                </label>
+                <select
+                  value={formData.proveedor_nombre}
+                  onChange={(e) => setFormData({ ...formData, proveedor_nombre: e.target.value })}
+                  className="w-full bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-xl p-2.5 focus:border-blue-600 focus:outline-none font-semibold"
+                >
+                  <option value="">-- Sin proveedor asociado / Gasto interno --</option>
+                  {activeProveedores.map((p) => (
+                    <option key={p.id} value={p.nombre_empresa}>
+                      {p.nombre_empresa} (CUIT: {p.cuit})
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div>

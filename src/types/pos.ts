@@ -22,6 +22,7 @@ export interface GastoItem {
   fecha: string;
   forma_pago_nombre: string;
   comprobante?: string;
+  proveedor_nombre?: string;
 }
 
 export interface Producto {
@@ -38,6 +39,7 @@ export interface Producto {
   stock_minimo: number;
   fecha_vencimiento?: string;
   estado: 'activo' | 'inactivo';
+  proveedor_habitual?: string;
 }
 
 export interface CartItem extends Producto {
@@ -58,11 +60,13 @@ export interface Cliente {
 
 export interface Proveedor {
   id: string;
-  razon_social: string;
-  cuit: string;
-  contacto_nombre?: string;
-  telefono?: string;
-  email?: string;
+  nombre_empresa: string;
+  direccion: string;
+  whatsapp: string;
+  cuit: string; // Formato xx.xxxxxx.x (solo números al escribir, con puntos en pantalla)
+  arba: string;
+  observaciones?: string;
+  estado: 'activo' | 'inactivo';
 }
 
 export interface Gasto {

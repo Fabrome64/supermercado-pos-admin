@@ -7,19 +7,23 @@ import { DashboardScreen } from './features/dashboard/DashboardScreen';
 import { FormasPagoScreen } from './features/config/FormasPagoScreen';
 import { ImpuestosScreen } from './features/config/ImpuestosScreen';
 import { GastosScreen } from './features/gastos/GastosScreen';
+import { ProveedoresScreen } from './features/proveedores/ProveedoresScreen';
 import { usePWAInstall } from './hooks/usePWAInstall';
-import type { FormaPagoItem, ImpuestoItem, GastoItem, Producto } from './types/pos';
-import { INITIAL_FORMAS_PAGO, INITIAL_IMPUESTOS, INITIAL_GASTOS_ITEMS, INITIAL_PRODUCTS } from './services/mockData';
+import type { FormaPagoItem, ImpuestoItem, GastoItem, Producto, Proveedor } from './types/pos';
+import { 
+  INITIAL_FORMAS_PAGO, INITIAL_IMPUESTOS, INITIAL_GASTOS_ITEMS, 
+  INITIAL_PRODUCTS, INITIAL_PROVEEDORES 
+} from './services/mockData';
 import { 
   ShoppingCart, Package, Users, LayoutDashboard, Store, Download, Smartphone, 
-  CreditCard, Percent, Wallet 
+  CreditCard, Percent, Wallet, Truck 
 } from 'lucide-react';
 
 const queryClient = new QueryClient();
 
 export function App() {
   const [activeTab, setActiveTab] = useState<
-    'dashboard' | 'pos' | 'productos' | 'clientes' | 'gastos' | 'formasPago' | 'impuestos'
+    'dashboard' | 'pos' | 'productos' | 'clientes' | 'gastos' | 'proveedores' | 'formasPago' | 'impuestos'
   >('dashboard');
   const { isInstallable, installPWA } = usePWAInstall();
 
@@ -28,6 +32,7 @@ export function App() {
   const [impuestos, setImpuestos] = useState<ImpuestoItem[]>(INITIAL_IMPUESTOS);
   const [gastos, setGastos] = useState<GastoItem[]>(INITIAL_GASTOS_ITEMS);
   const [products, setProducts] = useState<Producto[]>(INITIAL_PRODUCTS);
+  const [proveedores, setProveedores] = useState<Proveedor[]>(INITIAL_PROVEEDORES);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -107,6 +112,17 @@ export function App() {
             </button>
 
             <button
+              onClick={() => setActiveTab('proveedores')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                activeTab === 'proveedores'
+                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-950'
+                  : 'text-slate-300 hover:text-white hover:bg-blue-900/50'
+              }`}
+            >
+              <Truck className="w-3.5 h-3.5" /> Proveedores
+            </button>
+
+            <button
               onClick={() => setActiveTab('formasPago')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                 activeTab === 'formasPago'
@@ -156,7 +172,8 @@ export function App() {
             <ProductsScreen 
               products={products} 
               setProducts={setProducts} 
-              impuestos={impuestos} 
+              impuestos={impuestos}
+              proveedores={proveedores}
             />
           )}
           {activeTab === 'clientes' && (
@@ -168,7 +185,14 @@ export function App() {
             <GastosScreen 
               gastos={gastos} 
               setGastos={setGastos} 
-              formasPago={formasPago} 
+              formasPago={formasPago}
+              proveedores={proveedores}
+            />
+          )}
+          {activeTab === 'proveedores' && (
+            <ProveedoresScreen
+              proveedores={proveedores}
+              setProveedores={setProveedores}
             />
           )}
           {activeTab === 'formasPago' && (

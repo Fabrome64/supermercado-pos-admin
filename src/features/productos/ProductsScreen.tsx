@@ -1,20 +1,22 @@
 import React, { useState } from 'react';
-import type { Producto, ImpuestoItem } from '../../types/pos';
+import type { Producto, ImpuestoItem, Proveedor } from '../../types/pos';
 import { Package, Plus, Search, AlertTriangle, FileSpreadsheet, Edit3, Trash2 } from 'lucide-react';
 
 interface ProductsScreenProps {
   products: Producto[];
   setProducts: React.Dispatch<React.SetStateAction<Producto[]>>;
   impuestos: ImpuestoItem[];
+  proveedores?: Proveedor[];
 }
 
-export const ProductsScreen: React.FC<ProductsScreenProps> = ({ products, setProducts, impuestos }) => {
+export const ProductsScreen: React.FC<ProductsScreenProps> = ({ products, setProducts, impuestos, proveedores = [] }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Todas');
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Producto | null>(null);
 
   const activeImpuestos = impuestos.filter((i) => i.estado === 'activo');
+  const activeProveedores = proveedores.filter((p) => p.estado === 'activo');
 
   const [formData, setFormData] = useState({
     codigo_barras: '',
@@ -23,6 +25,7 @@ export const ProductsScreen: React.FC<ProductsScreenProps> = ({ products, setPro
     costo_adquisicion: 1000,
     margen_ganancia: 35,
     impuesto_pct: activeImpuestos[0]?.porcentaje || 21,
+    proveedor_habitual: '',
     stock_actual: 50,
     stock_minimo: 10,
     fecha_vencimiento: '',
@@ -47,6 +50,7 @@ export const ProductsScreen: React.FC<ProductsScreenProps> = ({ products, setPro
       costo_adquisicion: 1000,
       margen_ganancia: 35,
       impuesto_pct: activeImpuestos[0]?.porcentaje || 21,
+      proveedor_habitual: '',
       stock_actual: 50,
       stock_minimo: 10,
       fecha_vencimiento: '',
@@ -63,6 +67,7 @@ export const ProductsScreen: React.FC<ProductsScreenProps> = ({ products, setPro
       costo_adquisicion: prod.costo_adquisicion,
       margen_ganancia: prod.margen_ganancia,
       impuesto_pct: prod.impuesto_pct !== undefined ? prod.impuesto_pct : 21,
+      proveedor_habitual: prod.proveedor_habitual || '',
       stock_actual: prod.stock_actual,
       stock_minimo: prod.stock_minimo,
       fecha_vencimiento: prod.fecha_vencimiento || '',
@@ -98,6 +103,7 @@ export const ProductsScreen: React.FC<ProductsScreenProps> = ({ products, setPro
                 costo_adquisicion: costo,
                 margen_ganancia: margen,
                 impuesto_pct: imp,
+                proveedor_habitual: formData.proveedor_habitual || undefined,
                 precio_venta: Number(precioFinal.toFixed(2)),
                 stock_actual: Number(formData.stock_actual),
                 stock_minimo: Number(formData.stock_minimo),
@@ -115,6 +121,7 @@ export const ProductsScreen: React.FC<ProductsScreenProps> = ({ products, setPro
         costo_adquisicion: costo,
         margen_ganancia: margen,
         impuesto_pct: imp,
+        proveedor_habitual: formData.proveedor_habitual || undefined,
         precio_venta: Number(precioFinal.toFixed(2)),
         stock_actual: Number(formData.stock_actual),
         stock_minimo: Number(formData.stock_minimo),
@@ -365,6 +372,24 @@ export const ProductsScreen: React.FC<ProductsScreenProps> = ({ products, setPro
                 <span className="font-mono text-lg font-black text-blue-900">
                   ${precioCalculado.toFixed(2)}
                 </span>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-slate-700 block mb-1">
+                  Proveedor Habitual / Distribuidor (Desplegable Opcional)
+                </label>
+                <select
+                  value={formData.proveedor_habitual}
+                  onChange={(e) => setFormData({ ...formData, proveedor_habitual: e.target.value })}
+                  className="w-full bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-xl p-2.5 focus:border-blue-600 focus:outline-none font-semibold"
+                >
+                  <option value="">-- Sin proveedor asignado --</option>
+                  {activeProveedores.map((p) => (
+                    <option key={p.id} value={p.nombre_empresa}>
+                      {p.nombre_empresa} (CUIT: {p.cuit})
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
