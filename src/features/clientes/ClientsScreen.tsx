@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import type { Cliente, FormaPago } from '../../types/pos';
+import type { Cliente, FormaPagoItem, FormaPago } from '../../types/pos';
 import { INITIAL_CLIENTS } from '../../services/mockData';
 import { Users, Plus, Search, DollarSign, FileText, CreditCard, Calendar, Printer, X } from 'lucide-react';
 
@@ -13,7 +13,11 @@ interface MovimientoCuenta {
   saldoResultante: number;
 }
 
-export const ClientsScreen: React.FC = () => {
+interface ClientsScreenProps {
+  formasPago?: FormaPagoItem[];
+}
+
+export const ClientsScreen: React.FC<ClientsScreenProps> = ({ formasPago = [] }) => {
   const [clients, setClients] = useState<Cliente[]>(INITIAL_CLIENTS);
   const [searchTerm, setSearchTerm] = useState('');
   
@@ -22,6 +26,8 @@ export const ClientsScreen: React.FC = () => {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [selectedClient, setSelectedClient] = useState<Cliente | null>(null);
+
+  const activeFormasPago = formasPago.filter(fp => fp.estado === 'activo');
 
   // Formulario Nuevo Cliente
   const [newClientForm, setNewClientForm] = useState({
@@ -355,18 +361,28 @@ export const ClientsScreen: React.FC = () => {
                 </span>
               </div>
 
-              {/* Selector Forma de Pago */}
+              {/* Selector Forma de Pago Dinámico */}
               <div>
                 <label className="text-xs font-bold text-slate-700 block mb-1">Forma de Pago Utilizada</label>
                 <select
                   value={paymentForm.formaPago}
-                  onChange={(e) => setPaymentForm({ ...paymentForm, formaPago: e.target.value as FormaPago })}
+                  onChange={(e) => setPaymentForm({ ...paymentForm, formaPago: e.target.value as any })}
                   className="w-full bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-xl p-2.5 focus:border-blue-600 focus:outline-none font-semibold"
                 >
-                  <option value="efectivo">Efectivo en Caja</option>
-                  <option value="transferencia">Transferencia Bancaria</option>
-                  <option value="tarjeta_debito">Tarjeta de Débito</option>
-                  <option value="tarjeta_credito">Tarjeta de Crédito</option>
+                  {activeFormasPago.length > 0 ? (
+                    activeFormasPago.map((fp) => (
+                      <option key={fp.id} value={fp.nombre}>
+                        {fp.nombre}
+                      </option>
+                    ))
+                  ) : (
+                    <>
+                      <option value="Efectivo en Caja">Efectivo en Caja</option>
+                      <option value="Transferencia Bancaria">Transferencia Bancaria</option>
+                      <option value="Tarjeta de Débito">Tarjeta de Débito</option>
+                      <option value="Tarjeta de Crédito">Tarjeta de Crédito</option>
+                    </>
+                  )}
                 </select>
               </div>
 

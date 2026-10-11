@@ -1,4 +1,49 @@
-import type { Producto, Cliente, Gasto } from '../types/pos';
+import type { Producto, Cliente, Gasto, FormaPagoItem, ImpuestoItem, GastoItem } from '../types/pos';
+
+export const INITIAL_FORMAS_PAGO: FormaPagoItem[] = [
+  { id: 'fp-1', nombre: 'Efectivo en Caja', recargo_descuento_pct: 0, estado: 'activo' },
+  { id: 'fp-2', nombre: 'Tarjeta de Débito', recargo_descuento_pct: 0, estado: 'activo' },
+  { id: 'fp-3', nombre: 'Tarjeta de Crédito', recargo_descuento_pct: 10, estado: 'activo' },
+  { id: 'fp-4', nombre: 'Transferencia Bancaria', recargo_descuento_pct: -5, estado: 'activo' },
+  { id: 'fp-5', nombre: 'Cuenta Corriente', recargo_descuento_pct: 0, estado: 'activo' },
+];
+
+export const INITIAL_IMPUESTOS: ImpuestoItem[] = [
+  { id: 'imp-1', nombre: 'IVA General (21%)', porcentaje: 21, estado: 'activo' },
+  { id: 'imp-2', nombre: 'IVA Reducido (10.5%)', porcentaje: 10.5, estado: 'activo' },
+  { id: 'imp-3', nombre: 'Exento (0%)', porcentaje: 0, estado: 'activo' },
+  { id: 'imp-4', nombre: 'Percepción IIBB (3%)', porcentaje: 3, estado: 'activo' },
+];
+
+export const INITIAL_GASTOS_ITEMS: GastoItem[] = [
+  {
+    id: 'g-1',
+    concepto: 'Factura de Energía Eléctrica',
+    categoria: 'Servicios',
+    monto: 45000.00,
+    fecha: '2026-10-01',
+    forma_pago_nombre: 'Transferencia Bancaria',
+    comprobante: 'FAC-0004-9821'
+  },
+  {
+    id: 'g-2',
+    concepto: 'Bobinas de Papel Térmico 80mm',
+    categoria: 'Insumos',
+    monto: 12500.00,
+    fecha: '2026-10-05',
+    forma_pago_nombre: 'Efectivo en Caja',
+    comprobante: 'TKT-0012-3490'
+  },
+  {
+    id: 'g-3',
+    concepto: 'Mantenimiento Heladeras Exhibidoras',
+    categoria: 'Mantenimiento',
+    monto: 35000.00,
+    fecha: '2026-10-08',
+    forma_pago_nombre: 'Efectivo en Caja',
+    comprobante: 'REC-0089'
+  }
+];
 
 export const INITIAL_PRODUCTS: Producto[] = [
   {
@@ -9,6 +54,7 @@ export const INITIAL_PRODUCTS: Producto[] = [
     categoria: 'Lácteos',
     costo_adquisicion: 850.00,
     margen_ganancia: 35.00,
+    impuesto_pct: 21,
     precio_venta: 1147.50,
     stock_actual: 45,
     stock_minimo: 10,
@@ -23,6 +69,7 @@ export const INITIAL_PRODUCTS: Producto[] = [
     categoria: 'Panadería',
     costo_adquisicion: 1400.00,
     margen_ganancia: 40.00,
+    impuesto_pct: 10.5,
     precio_venta: 1960.00,
     stock_actual: 8,
     stock_minimo: 12,
@@ -37,6 +84,7 @@ export const INITIAL_PRODUCTS: Producto[] = [
     categoria: 'Almacén',
     costo_adquisicion: 2100.00,
     margen_ganancia: 30.00,
+    impuesto_pct: 21,
     precio_venta: 2730.00,
     stock_actual: 3,
     stock_minimo: 5,
@@ -51,6 +99,7 @@ export const INITIAL_PRODUCTS: Producto[] = [
     categoria: 'Almacén',
     costo_adquisicion: 3200.00,
     margen_ganancia: 35.00,
+    impuesto_pct: 21,
     precio_venta: 4320.00,
     stock_actual: 28,
     stock_minimo: 8,
@@ -65,6 +114,7 @@ export const INITIAL_PRODUCTS: Producto[] = [
     categoria: 'Limpieza',
     costo_adquisicion: 4500.00,
     margen_ganancia: 45.00,
+    impuesto_pct: 21,
     precio_venta: 6525.00,
     stock_actual: 14,
     stock_minimo: 4,

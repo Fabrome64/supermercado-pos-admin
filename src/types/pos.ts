@@ -1,5 +1,29 @@
 export type FormaPago = 'efectivo' | 'tarjeta_debito' | 'tarjeta_credito' | 'transferencia' | 'cuenta_corriente';
 
+export interface FormaPagoItem {
+  id: string;
+  nombre: string;
+  recargo_descuento_pct: number; // Positivo = recargo %, Negativo = descuento %
+  estado: 'activo' | 'inactivo';
+}
+
+export interface ImpuestoItem {
+  id: string;
+  nombre: string;
+  porcentaje: number; // Ej: 21 para IVA 21%, 10.5 para IVA 10.5%
+  estado: 'activo' | 'inactivo';
+}
+
+export interface GastoItem {
+  id: string;
+  concepto: string;
+  categoria: string;
+  monto: number;
+  fecha: string;
+  forma_pago_nombre: string;
+  comprobante?: string;
+}
+
 export interface Producto {
   id: string;
   codigo_barras: string;
@@ -8,6 +32,7 @@ export interface Producto {
   categoria: string;
   costo_adquisicion: number;
   margen_ganancia: number;
+  impuesto_pct?: number;
   precio_venta: number;
   stock_actual: number;
   stock_minimo: number;
