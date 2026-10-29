@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { POSScreen } from './features/pos/POSScreen';
 import { ProductsScreen } from './features/productos/ProductsScreen';
@@ -16,7 +16,7 @@ import {
 } from './services/mockData';
 import { 
   ShoppingCart, Package, Users, LayoutDashboard, Download, Smartphone, 
-  CreditCard, Percent, Wallet, Truck, MapPin, MessageCircle 
+  CreditCard, Percent, Wallet, Truck, MapPin, MessageCircle, Lock, KeyRound, ShieldAlert 
 } from 'lucide-react';
 
 const queryClient = new QueryClient();
@@ -34,6 +34,81 @@ export function App() {
   const [products, setProducts] = useState<Producto[]>(INITIAL_PRODUCTS);
   const [proveedores, setProveedores] = useState<Proveedor[]>(INITIAL_PROVEEDORES);
 
+  // Control de Licencia y Bloqueo Remoto (Trial 5 días + Kill-Switch)
+  const [isLocked, setIsLocked] = useState(false);
+  const [lockReason, setLockReason] = useState('');
+  const [unlockPin, setUnlockPin] = useState('');
+  const [pinError, setPinError] = useState(false);
+  const [showPinInput, setShowPinInput] = useState(false);
+
+  useEffect(() => {
+    const checkLicense = async () => {
+      // 1. Si ya se desbloqueó con clave permanente en este dispositivo
+      if (localStorage.getItem('sj_pos_unlocked') === 'true') {
+        setIsLocked(false);
+        return;
+      }
+
+      // 2. Control de tiempo de prueba local (5 días desde primer uso)
+      const TRIAL_DAYS = 5;
+      const trialStartStr = localStorage.getItem('sj_pos_trial_start');
+      let trialStart = trialStartStr ? Number(trialStartStr) : null;
+      if (!trialStart) {
+        trialStart = Date.now();
+        localStorage.setItem('sj_pos_trial_start', trialStart.toString());
+      }
+      const msPassed = Date.now() - trialStart;
+      const daysPassed = msPassed / (1000 * 60 * 60 * 24);
+
+      if (daysPassed > TRIAL_DAYS) {
+        setIsLocked(true);
+        setLockReason(`Período de prueba de ${TRIAL_DAYS} días finalizado. Comuníquese para adquirir la licencia comercial.`);
+        return;
+      }
+
+      // 3. Consulta del Kill-Switch Remoto (GitHub / local)
+      try {
+        const timestamp = Date.now();
+        const remoteUrl = `https://raw.githubusercontent.com/Fabrome64/supermercado-pos-admin/main/public/license.json?t=${timestamp}`;
+        let res = await fetch(remoteUrl, { cache: 'no-store' }).catch(() => null);
+        if (!res || !res.ok) {
+          res = await fetch(`./license.json?t=${timestamp}`, { cache: 'no-store' }).catch(() => null);
+        }
+        if (res && res.ok) {
+          const lic = await res.json();
+          if (lic.activa === false) {
+            setIsLocked(true);
+            setLockReason(lic.mensaje || 'Sistema pausado remotamente por el desarrollador.');
+            return;
+          }
+          if (lic.fecha_vencimiento) {
+            const expDate = new Date(lic.fecha_vencimiento).getTime();
+            if (Date.now() > expDate) {
+              setIsLocked(true);
+              setLockReason(lic.mensaje || 'Período de prueba vencido.');
+              return;
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Licencia remota no accesible:', err);
+      }
+    };
+
+    checkLicense();
+  }, []);
+
+  const handleUnlockWithPin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (unlockPin.trim().toUpperCase() === 'SJ2026' || unlockPin.trim().toUpperCase() === 'SANJOSE2026') {
+      localStorage.setItem('sj_pos_unlocked', 'true');
+      setIsLocked(false);
+      setPinError(false);
+    } else {
+      setPinError(true);
+    }
+  };
+
   return (
     <QueryClientProvider client={queryClient}>
       <div className="min-h-screen bg-[#E6E6FA] text-slate-900 flex flex-col font-sans select-none">
@@ -41,17 +116,17 @@ export function App() {
         <header className="bg-[#0B192C] text-white border-b border-slate-800 px-6 py-3 flex items-center justify-between shadow-xl z-10 flex-wrap gap-4">
           <div className="flex items-center gap-3.5">
             <img 
-              src="/logo.jpg" 
-              alt="Lo de SU - Kiosco Almacén" 
-              className="w-13 h-13 rounded-full object-cover border-2 border-pink-500 shadow-lg shadow-pink-500/25 shrink-0 bg-slate-950" 
+              src="./logo.jpg" 
+              alt="Supermercado San José" 
+              className="w-13 h-13 rounded-2xl object-cover border-2 border-yellow-400 shadow-lg shadow-yellow-500/20 shrink-0 bg-slate-950" 
             />
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="font-black text-white text-lg tracking-tight leading-none">
-                  Lo de SU
+                  Supermercado San José
                 </h1>
-                <span className="bg-pink-950/80 text-pink-300 border border-pink-600/70 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
-                  Kiosco • Almacén
+                <span className="bg-amber-950/80 text-amber-300 border border-amber-500/70 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                  SJ • Supermercado
                 </span>
                 <span className="bg-blue-950 text-blue-300 border border-blue-700 text-[10px] px-2 py-0.5 rounded-full font-mono font-bold">
                   PWA
@@ -230,6 +305,84 @@ export function App() {
             />
           )}
         </main>
+
+        {/* Modal de Bloqueo Remoto / Fin de Período de Prueba */}
+        {isLocked && (
+          <div className="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-4">
+            <div className="bg-slate-900 border border-red-500/40 rounded-3xl max-w-lg w-full p-8 shadow-2xl text-center space-y-6">
+              <div className="relative mx-auto w-24 h-24">
+                <img 
+                  src="./logo.jpg" 
+                  alt="Supermercado San José" 
+                  className="w-24 h-24 rounded-2xl object-cover border-4 border-yellow-400 shadow-2xl mx-auto" 
+                />
+                <div className="absolute -bottom-2 -right-2 bg-red-600 text-white p-1.5 rounded-full shadow-lg">
+                  <Lock className="w-5 h-5" />
+                </div>
+              </div>
+
+              <div>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-red-500/20 text-red-400 border border-red-500/30">
+                  <ShieldAlert className="w-4 h-4" /> Sistema Suspendido
+                </span>
+                <h2 className="text-2xl font-black text-white mt-3">
+                  Período de Evaluación Finalizado
+                </h2>
+                <p className="text-sm text-slate-300 mt-2 leading-relaxed">
+                  {lockReason || 'El período de prueba para Supermercado San José ha concluido. Para continuar utilizando el sistema de caja y administración, por favor comuníquese con el desarrollador.'}
+                </p>
+              </div>
+
+              <div className="space-y-3 pt-2">
+                <a
+                  href="https://wa.me/5491125819825?text=Hola!%20Quiero%20activar%20la%20licencia%20comercial%20del%20sistema%20para%20Supermercado%20San%20Jos%C3%A9"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 px-6 rounded-2xl text-base shadow-lg shadow-emerald-950 transition-all cursor-pointer"
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  Contactar por WhatsApp (+54 9 11 2581-9825)
+                </a>
+
+                {!showPinInput ? (
+                  <button
+                    onClick={() => setShowPinInput(true)}
+                    className="text-xs text-slate-400 hover:text-slate-200 transition-colors flex items-center justify-center gap-1.5 mx-auto pt-2 cursor-pointer"
+                  >
+                    <KeyRound className="w-3.5 h-3.5" /> Ingresar clave de activación comercial
+                  </button>
+                ) : (
+                  <form onSubmit={handleUnlockWithPin} className="space-y-2 pt-2">
+                    <div className="flex gap-2">
+                      <input
+                        type="password"
+                        placeholder="Clave de licencia (ej: SJ2026)"
+                        value={unlockPin}
+                        onChange={(e) => {
+                          setUnlockPin(e.target.value);
+                          setPinError(false);
+                        }}
+                        className="flex-1 bg-slate-800 border border-slate-700 text-white px-3.5 py-2.5 rounded-xl text-sm font-mono focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                        autoFocus
+                      />
+                      <button
+                        type="submit"
+                        className="bg-yellow-400 hover:bg-yellow-300 text-slate-950 font-black px-4 py-2.5 rounded-xl text-sm transition-all cursor-pointer"
+                      >
+                        Activar
+                      </button>
+                    </div>
+                    {pinError && (
+                      <p className="text-xs text-red-400 font-bold">
+                        Clave incorrecta. Solicítela al desarrollador por WhatsApp.
+                      </p>
+                    )}
+                  </form>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </QueryClientProvider>
   );
